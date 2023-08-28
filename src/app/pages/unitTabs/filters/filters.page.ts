@@ -1,28 +1,18 @@
-import { Component, Input, OnInit, NgZone } from '@angular/core';
-import { ModalController, NavParams } from '@ionic/angular';
+import { Component, Input, OnInit } from '@angular/core';
+import { ModalController } from '@ionic/angular';
 import { ApiService } from 'src/app/services/api-service.service';
 import { GlobalService } from 'src/app/services/global.service';
-import { config, KEY, UNITURL } from '../../config/config';
-import { Geolocation } from '@ionic-native/geolocation/ngx';
-import {
-  NativeGeocoder,
-  NativeGeocoderResult,
-  NativeGeocoderOptions
-} from '@ionic-native/native-geocoder/ngx';
-
-declare var google;
+import { AngularFireDatabase } from '@angular/fire/database'; // Import AngularFireDatabase
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.page.html',
   styleUrls: ['./filters.page.scss'],
-  providers: [NavParams]
 })
 export class FiltersPage implements OnInit {
-  
+
   @Input() filters: any;
 
-  private url: any = config.url;
   features: any = [];
   timeSlotTypeList: any = [];
   public dates = {
@@ -33,88 +23,37 @@ export class FiltersPage implements OnInit {
   selectedTimeSlot: any = [];
   selectedAccess: any;
   city: any = '';
-  autocomplete: { input: string; };
-  autocompleteItems: any[];
-  GoogleAutocomplete: any;
-  lat: any;
-  long: any;
-  address: any;
 
   constructor(
     private api: ApiService,
     private _gs: GlobalService,
-    public navParams: NavParams,
-    public modalCtrl: ModalController,
-    private zone : NgZone,
-    private nativeGeocoder: NativeGeocoder,
-    private geolocation : Geolocation
-  ) { 
-
-     // get current location
-     setTimeout(() =>{ 
-      this.getCurrentLocation();
-    }, 1500);
-    
-    this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
-    this.autocomplete = { input: '' };
-    this.autocompleteItems = [];
-
-  }
- 
+    private modalCtrl: ModalController,
+    private db: AngularFireDatabase // Inject AngularFireDatabase
+  ) { }
 
   ngOnInit() {
-    if (this.navParams.get('filters')) {
-      let filters = JSON.parse(this.navParams.get('filters'));
-      console.log(filters);
-      this.city = filters.city;
-      if (filters.selectedDates) {
-        this.dates.startDate = filters.selectedDates.startDate;
-        this.dates.endDate = filters.selectedDates.endDate;
-      }
-      if (filters.features) {
-        this.selectedFeaturs = filters.features;
-      }
-      if (filters.accessTime) {
-        this.selectedTimeSlot = filters.accessTime;
-      }
-    }
-    this.placeMeta();
+    // Initialize the filters based on your Firebase data
+    this.loadFiltersFromFirebase();
   }
-  placeMeta() {
-    const params = {
-      apiKey : KEY.apikey
-    };
-    this.api.postRequest(this.url + UNITURL.placeMeta, params).subscribe(
-      async (result) => {
-        if (result.success) {
-         console.log(result);
-          this.features = result.data.list.amenities;
-          console.log(this.features);
-          if (this.selectedFeaturs.length) {
-            this.selectedFeaturs.map(y => {
-              let index = this.features.indexOf(y._id);
-              this.features.splice(index, 1);
-            });
-          }
-          this.timeSlotTypeList = result.data.list.accessType;
-          console.log(this.timeSlotTypeList);
-          if (this.selectedTimeSlot.length) {
-            this.selectedTimeSlot.map(x => {
-              this.selectedAccess = x;
-            });
-          };
-        } else {
-          console.log(result.message);
-        }
-      })
+
+  loadFiltersFromFirebase() {
+    // Use AngularFireDatabase to fetch data from Firebase
+    this.db.list('features').valueChanges().subscribe(
+      (features) => {
+        this.features = features;
+      }
+    );
+
+    // Fetch other filter data from Firebase and set it accordingly
+    // You can use db.object() or db.list() depending on your database structure
   }
+
   onTimeChange(ev) {
     this.selectedTimeSlot = [];
     this.selectedTimeSlot.push(ev.detail.value);
-    console.log(this.selectedTimeSlot);
   }
 
-  applyFilters() {
+ applyFilters() {
     let filters: any = {};
     if (this.selectedTimeSlot.length) {
       filters['accessTime'] = this.selectedTimeSlot;
@@ -138,6 +77,7 @@ export class FiltersPage implements OnInit {
     this._gs.setFilterRefresh(filters);
   }
 
+  
 
   clearFilters() {
     this.clearAll();
@@ -145,118 +85,20 @@ export class FiltersPage implements OnInit {
   }
   clearAll() {
     this.selectedFeaturs = [];
-    this.placeMeta();
     this.dates.startDate = '';
     this.dates.endDate = '';
     this.city = '';
     this.selectedAccess = '';
     this.dismiss();
   }
-  clearFeature(i) {
-    this.features.splice(i);
-  }
+
   dismiss() {
     this.modalCtrl.dismiss({
       'dismissed': true
     });
   }
 
-  checkFocus(){
-    console.log('focus');
-  }
-
-  clearAutocomplete(){
-    this.autocompleteItems = []
-    this.autocomplete.input = '';
-  }
-
-  searchLocation(){
-    if (this.autocomplete.input == '') {
-      this.autocompleteItems = [];
-      return;
-    }
-    this.GoogleAutocomplete.getPlacePredictions({ input: this.autocomplete.input },
-      (predictions, status) => {
-        this.autocompleteItems = [];
-        this.zone.run(() => {
-          predictions.forEach((prediction) => {
-            this.autocompleteItems.push(prediction);
-          });
-        });
-      });
-  }
-
-  selectSearchResult(item) {
-    this.address = item.structured_formatting.main_text;
-    this.autocomplete.input = this.address;
-    this.autocompleteItems = [];
-    this.getLatLOng(item.description).then(location =>{
-      this.filters['location'] = [location[0]['longitude'],location[0]['latitude']];
-    });
-  }
-  
-  getLatLOng(addressString: any) : Promise<any> {
-    console.log(addressString);
-    let options: NativeGeocoderOptions = {
-      useLocale: true,
-      maxResults: 5,
-    };
-    console.log(options);
-    return new Promise((resolve, reject) =>
-    {
-       this.nativeGeocoder.forwardGeocode(addressString)
-       .then((result: NativeGeocoderResult[]) => 
-       {
-          console.log(result);
-          resolve(result);
-       })
-       .catch((error: any) => 
-       {
-          reject(error);
-       });
-    });
-  }
-
-  getCurrentLocation() {
-    this.geolocation.getCurrentPosition().then((resp) => {
-      this.lat = resp.coords.latitude;
-      this.long = resp.coords.longitude;
-      this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude);
-    });
-  }
-
-  useCurrentLocation(){
-    if(this.lat && this.long){
-      this.filters['location'] = [this.lat,this.long];
-    }
-  }
-
-  getAddressFromCoords(latitude: number, longitude: number) {
-    console.log("getAddressFromCoords " + latitude + " " + longitude);
-    if (latitude == undefined) {
-      return;
-    }
-    let options: NativeGeocoderOptions = {
-      useLocale: true,
-      maxResults: 5
-    };
-    this.nativeGeocoder.reverseGeocode(latitude, longitude, options)
-      .then((result: NativeGeocoderResult[]) => {
-        this.address = "";
-        let responseAddress = [];
-        for (let [key, value] of Object.entries(result[0])) {
-          if (value.length > 0)
-            responseAddress.push(value);
-        }
-        responseAddress.reverse();
-        for (let value of responseAddress) {
-          this.address += value + ", ";
-        }
-        this.address = this.address.slice(0, -2);
-      })
-      .catch((error: any) => {
-        this.address = "Address Not Available!";
-      });
-  }
-
 }
+
+
+

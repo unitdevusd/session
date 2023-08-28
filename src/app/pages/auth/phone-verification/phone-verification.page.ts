@@ -6,7 +6,6 @@ import { ApiService } from 'src/app/services/api-service.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { ToastService } from 'src/app/services/toast.service';
 import { countryCode } from 'src/app/utilities/countrycode';
-import { config,UNITURL } from '../../config/config';
 
 @Component({
   selector: 'app-phone-verification',
@@ -17,7 +16,7 @@ export class PhoneVerificationPage implements OnInit {
 
   contactForm: FormGroup;
   isOTP: boolean = false;
-  url: any = config.url;
+  
   countryList = countryCode;
   text: string;
   otpForm : FormGroup;

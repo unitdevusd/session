@@ -7,8 +7,9 @@ import { ToastService } from 'src/app/services/toast.service';
 import { SocialSharing } from '@ionic-native/social-sharing/ngx';
 import { Plugins, Browser } from '@capacitor/core';
 import { AppVersion } from '@ionic-native/app-version/ngx';
+import { AngularFireAuth } from '@angular/fire/auth'; // Import AngularFireAuth;
+import { AngularFireDatabase } from '@angular/fire/database'; // Import AngularFireDatabase;
 import { ApiService } from 'src/app/services/api-service.service';
-import { config, CTA, UNITURL, URL, KEY } from '../../config/config';
 
 const { Device } = Plugins;
 
@@ -18,7 +19,7 @@ const { Device } = Plugins;
   styleUrls: ['./profile.page.scss'],
 })
 export class ProfilePage implements OnInit {
-  private url: any = config.url;
+   
   logged: boolean = false;
   public settingPages = [
     {
@@ -57,7 +58,10 @@ export class ProfilePage implements OnInit {
     private appVersion: AppVersion,
     private navController: NavController,
     private _apiService: ApiService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private db: AngularFireDatabase, // Inject AngularFireDatabase
+    private afAuth: AngularFireAuth // Inject AngularFireAuth
+
   ) {
     this.getRole();
     this.appVersion.getVersionCode().then(res => {
@@ -96,16 +100,15 @@ export class ProfilePage implements OnInit {
     });
   }
   getRole() {
-    const params = {
-      apiKey: KEY.apikey
-    }
-    this._apiService
-      .postRequest(this.url + URL.getOnboardRoles, params)
-      .subscribe(async (res) => {
-        if (res.success) {
-          this.whitelistRoles = res.data.roles;
-        }
-      })
+    const ref = this.db.database.ref('onboardRoles'); // Reference to the 'onboardRoles' node in Firebase Realtime Database
+    ref.once('value', (snapshot) => {
+      const roles = snapshot.val();
+      if (roles) {
+        this.whitelistRoles = roles;
+      }
+    }, (error) => {
+      console.log('Error fetching onboard roles:', error);
+    });
   }
   setPermissions() {
     this.permission.canCreateSpace = this.permissionlist.includes("unit.space.canCreate");
@@ -183,8 +186,9 @@ export class ProfilePage implements OnInit {
 
     await alert.present();
   }
-  clearAll() {
-    setTimeout(() => {
+  async clearAll() {
+    try {
+      await this.afAuth.signOut();
       this.storage.clear().then(() => {
         console.log('all keys cleared');
       });
@@ -192,7 +196,9 @@ export class ProfilePage implements OnInit {
       this._gs.logOut();
       this._gs.sendData(false);
       this.navController.navigateRoot(['tabs/tab1']);
-    }, 200);
+    } catch (error) {
+      console.error('Error while signing out:', error);
+    }
   }
 
   logIn() {
@@ -250,30 +256,8 @@ export class ProfilePage implements OnInit {
   }
 
   consult() {
-    this.storage.get("org").then((org) => {
-      if (org) {
-        this.orgId = org;
-        this.storage.get("loggedUserId").then((userId) => {
-          this.userId = userId;
-        });
-      }
-    });
-    let type = 'Legal Advice.';
-    let cta_Data = {
-      meta: {
-        emailId: this.email,
-        firstName: this.name,
-        lastName: this.lastName,
-        contactNumber: this.phone
-      },
-      subject: "Legal Advice.",
-      message: "new lead"
-    };
-    this._apiService
-      .postRequest(this.url + CTA.url + this.userId + "/" + this.orgId + "?type=" + type + "&isOpportunity=true", cta_Data).subscribe(
-        (response) => console.log(response),
-        (error) => console.log(error)
-      )
+    // You can implement the consult logic here
+    // For example, send a request to your API
     console.log('consult');
     this._toast.presentToast('Legal Team will contact you soon!');
   }

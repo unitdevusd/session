@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from 'src/app/services/api-service.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { ToastService } from 'src/app/services/toast.service';
-import { config,UNITURL } from '../../config/config';
 import { Storage } from '@ionic/storage';
 import { GlobalService } from 'src/app/services/global.service';
 
@@ -17,7 +16,7 @@ export class CheckrPage implements OnInit {
 
   checkrForm: FormGroup;
   user: any;
-  url: any = config.url;
+  
   minDate: string = new Date().toISOString();
   token: any;
   orgId: any;

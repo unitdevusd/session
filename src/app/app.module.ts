@@ -19,6 +19,8 @@ import { Network } from '@ionic-native/network/ngx';
 import { AppVersion } from '@ionic-native/app-version/ngx';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireDatabaseModule } from '@angular/fire/database';
 
 
 @NgModule({
@@ -28,6 +30,8 @@ import { environment } from '../environments/environment';
     BrowserModule,
     IonicModule.forRoot({hardwareBackButton: false}), 
     AppRoutingModule,
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireDatabaseModule,
     HttpClientModule, 
     CalendarModule,
     

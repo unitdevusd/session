@@ -5,7 +5,6 @@ import { ApiService } from 'src/app/services/api-service.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { ToastService } from 'src/app/services/toast.service';
-import { config , KEY, UNITURL} from '../../config/config';
 import { Storage } from '@ionic/storage';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import {
@@ -15,6 +14,8 @@ import {
 } from '@ionic-native/native-geocoder/ngx';
 import { FiltersPage } from '../filters/filters.page';
 import { Platform } from '@ionic/angular';
+import { AngularFireDatabase } from '@angular/fire/database'; // Import AngularFireDatabase
+
 
 declare var google;
 
@@ -28,7 +29,7 @@ export class Tab1Page implements OnInit {
   @ViewChild(IonSlides) slides: IonSlides;
   @ViewChild('searchbar', { static: false }) searchbar: IonSearchbar;
   
-  url: any = config.url;
+  
   spaceType: any[];
   placesList: any = [];
   today: any = Date.now();
@@ -57,12 +58,15 @@ export class Tab1Page implements OnInit {
     private _apiService: ApiService,
     private _loader: LoaderService,
     private _gs: GlobalService,
+    private afDB: AngularFireDatabase, // Inject AngularFireDatabase
     private storage : Storage,
     private _toast: ToastService,
     private geolocation : Geolocation,
     private nativeGeocoder: NativeGeocoder,
+    private db: AngularFireDatabase, // Add this line
     public zone: NgZone,
-    public modalCtrl : ModalController) {
+    public modalCtrl : ModalController)
+     {
       
     // get current location
     setTimeout(() =>{ 
@@ -163,39 +167,34 @@ export class Tab1Page implements OnInit {
       filters,
     };
     console.log(params);
-    this._apiService.postRequest(this.url + UNITURL.spaces,
-      params)
-      .subscribe(
-        async (result) => {
-          console.log(result);
-          if (result.success) {
-            this._loader.dismiss();
-            this.placesList = result.data.list;
-            console.log(this.placesList);
-          }else{
-            this._loader.dismiss();
-            console.log('err', result);
-          }
-        }
-      ), (error) => {
-        this._loader.dismiss();
-        console.log('error', error)
+
+    // Construct the Firebase Realtime Database query
+    const query = this.afDB.database.ref('spaces')
+      .orderByChild('filters')
+      .equalTo(JSON.stringify(filters));
+
+    // Execute the query
+    query.once('value', snapshot => {
+      const data = snapshot.val();
+      if (data) {
+        this.placesList = Object.values(data);
       }
+      this._loader.dismiss();
+    });
   }
   
   placeMeta() {
-    const params = {
-      apiKey: KEY.apikey
-    };
-    this._apiService.postRequest(this.url + UNITURL.placeMeta, params).subscribe(
-      async (result) => {
-        if (result.success) {
-          console.log(result);
-          this.spaceType = result.data.list.spaceType;
-        } else {
-          this._toast.presentToast(result.message);
-        }
-      });
+    const spaceTypeRef = this.db.list('spaceTypes'); // Reference to the 'spaceTypes' node in your Firebase database
+    
+    spaceTypeRef.valueChanges().subscribe(
+      (spaceTypes: any[]) => {
+        this.spaceType = spaceTypes;
+      },
+      (error) => {
+        console.error('Error fetching space types:', error);
+        this._toast.presentToast('Error fetching space types');
+      }
+    );
   }
 
   ngOnInit() {

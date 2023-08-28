@@ -3,7 +3,6 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { AlertController } from '@ionic/angular';
 import { ApiService } from 'src/app/services/api-service.service';
 import { LoaderService } from 'src/app/services/loader.service';
-import { config,URL } from '../../config/config';
 import { Storage } from '@ionic/storage';
 
 @Component({
@@ -13,7 +12,7 @@ import { Storage } from '@ionic/storage';
 })
 export class ChangePasswordPage implements OnInit {
   passwordForm: FormGroup;
-  private url: any = config.url;
+   
   token: any;
   
   constructor(

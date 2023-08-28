@@ -3,12 +3,13 @@ import { NavigationExtras, Router } from '@angular/router';
 import { ApiService } from 'src/app/services/api-service.service';
 import { GlobalService } from 'src/app/services/global.service';
 import { LoaderService } from 'src/app/services/loader.service';
-import { config,UNITURL } from '../../config/config';
 import { Storage } from '@ionic/storage';
 import { ToastService } from 'src/app/services/toast.service';
 import { segment,getDays } from 'src/app/utilities/mainfunction';
 import { IonSlides } from '@ionic/angular';
 import * as moment from 'moment';
+import { AngularFireDatabase } from '@angular/fire/database'; // Import AngularFireDatabase
+
 
 @Component({
   selector: 'app-tab2',
@@ -18,7 +19,7 @@ import * as moment from 'moment';
 export class Tab2Page  implements OnInit {
 
   segment = 0;
-  url: any = config.url;
+  
   placeData: any;
   bookedlist: any;
   price: number;
@@ -34,7 +35,9 @@ export class Tab2Page  implements OnInit {
     private _loader: LoaderService,
     private _gs: GlobalService,
     private storage : Storage,
-    private _toast: ToastService
+    private _toast: ToastService,
+    private db: AngularFireDatabase // Inject AngularFireDatabase
+
   ) {
 
     this._gs.getUpdatedTabs().subscribe(status => {
@@ -85,35 +88,30 @@ export class Tab2Page  implements OnInit {
 
   getMyStays() {
     this._loader.present();
-    if(this.token && this.orgId){
-      const params = {
-        token: this.token,
-        orgId : this.orgId
-      }
-      console.log(this.url + UNITURL.mybookings);
-      console.log(params);
-      this._apiService.postRequest(this.url + UNITURL.mybookings,
-        params).subscribe(
-          async (result) => {
-            console.log(result);
-            if (result.success) {
-              console.log('',result.data.bookingList);
-              this.placeData = segment(result.data.bookingList);
-              if(this.placeData.bookedlist.length || this.placeData.cancledList.length || this.placeData.completedList.length){
-                  this.placeData.bookedlist.reverse();
-                  this.placeData.cancledList.reverse();
-                  this.placeData.completedList.reverse();
-              }
+    if (this.token && this.orgId) {
+      this.db.list('mybookings').valueChanges().subscribe(
+        (result: any) => {
+          console.log(result);
+          if (result && result.data && result.data.bookingList) {
+            this.placeData = segment(result.data.bookingList);
+            if (this.placeData.bookedlist.length || this.placeData.cancledList.length || this.placeData.completedList.length) {
+              this.placeData.bookedlist.reverse();
+              this.placeData.cancledList.reverse();
+              this.placeData.completedList.reverse();
             }
-            this._loader.dismiss();
+          } else {
+            this.placeData = null;
           }
-        ), (error) => {
+          this._loader.dismiss();
+        },
+        (error) => {
           this._loader.dismiss();
           this._toast.presentToast(error.description);
         }
+      );
     }
   }
-
+  
   logIn() {
     let navigationExtras: NavigationExtras = {
       queryParams: {

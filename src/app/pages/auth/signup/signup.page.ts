@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
-import { config,URL } from '../../config/config';
 
 @Component({
   selector: 'app-signup',
@@ -12,7 +11,7 @@ export class SignupPage implements OnInit {
 
   private signupForm: FormGroup;
   private contact: any;
-  url: any = config.url;
+  
 
   
   constructor(private formBuilder: FormBuilder,

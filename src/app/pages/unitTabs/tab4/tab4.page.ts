@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
-import { ApiService } from 'src/app/services/api-service.service';
-import { GlobalService } from 'src/app/services/global.service';
-import { LoaderService } from 'src/app/services/loader.service';
-import { config, UNITURL } from '../../config/config';
+import { AngularFireDatabase } from '@angular/fire/database'; // Import AngularFireDatabase
 import { Storage } from '@ionic/storage';
 import { ToastService } from 'src/app/services/toast.service';
 
@@ -15,58 +12,50 @@ import { ToastService } from 'src/app/services/toast.service';
 export class Tab4Page implements OnInit {
 
   placeData: any = [];
-  url: any = config.url;
-  places: any = [];
-  startDate: any;
   token: any;
   orgId: any;
 
   constructor(
-    private _apiService: ApiService,
-    private _loader: LoaderService,
     private router: Router,
-    private _gs: GlobalService,
     private storage: Storage,
-    private _toast: ToastService
+    private _toast: ToastService,
+    private afDB: AngularFireDatabase // Inject AngularFireDatabase
   ) { }
 
   ngOnInit() {
     this.getUserData();
   }
 
-  getUserData() {
-    this.storage.get("session").then((session) => {
-      if (session) {
-        this.storage.get("org").then((org) => {
-          if (org) {
-            this.token = session;
-            this.orgId = org;
-            this.getMybookedPlaces();
+  async getUserData() {
+    const session = await this.storage.get("session");
+    const org = await this.storage.get("org");
+    
+    if (session && org) {
+      this.token = session;
+      this.orgId = org;
+      this.getMybookedPlaces();
+    }
+  }
+
+  async getMybookedPlaces() {
+    try {
+      if (this.token) {
+        // Construct the Firebase Realtime Database query
+        const query = this.afDB.database.ref('bookedPlaces')
+          .orderByChild('token')
+          .equalTo(this.token);
+
+        // Execute the query
+        query.once('value', snapshot => {
+          const data = snapshot.val();
+          if (data) {
+            this.placeData = Object.values(data);
           }
         });
       }
-    });
-  }
-  getMybookedPlaces() {
-    this._loader.present('');
-    if (this.token) {
-      const params = {
-        token: this.token,
-        orgId: this.orgId
-      }
-      this._apiService.postRequest(this.url + UNITURL.bookedPlaces,
-        params).subscribe(
-          async (result) => {
-            if (result.success) {
-              this.placeData = result.data.places;
-              this._loader.dismiss();
-            }
-          }
-        ), (error) => {
-          this._loader.dismiss();
-          console.log(error.description);
-          this._toast.presentToast(error.description);
-        }
+    } catch (error) {
+      console.error(error.description);
+      this._toast.presentToast(error.description);
     }
   }
 

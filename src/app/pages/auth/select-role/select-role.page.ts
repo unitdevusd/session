@@ -4,7 +4,6 @@ import { AlertController } from '@ionic/angular';
 import { ApiService } from 'src/app/services/api-service.service';
 import { LoaderService } from 'src/app/services/loader.service';
 import { ToastService } from 'src/app/services/toast.service';
-import { config,URL,KEY } from '../../config/config';
 
 @Component({
   selector: 'app-select-role',
@@ -13,7 +12,7 @@ import { config,URL,KEY } from '../../config/config';
 })
 export class SelectRolePage implements OnInit {
   signInData: any;
-  private url: any = config.url;
+   
   roles: any = [];
   constructor(
     private router: Router,

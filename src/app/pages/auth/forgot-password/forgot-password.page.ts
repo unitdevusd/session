@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertController } from '@ionic/angular';
 import { ApiService } from 'src/app/services/api-service.service';
-import { config, configEmail,URL } from '../../config/config';
 
 
 @Component({
@@ -13,7 +12,7 @@ import { config, configEmail,URL } from '../../config/config';
 export class ForgotPasswordPage implements OnInit {
 
   private fp: FormGroup;
-  private url: any = config.url;
+   
   
   
   constructor(
