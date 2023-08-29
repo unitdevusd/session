@@ -31,10 +31,10 @@ const routes: Routes = [
         path: 'tab4',
         loadChildren: () => import('../../unitTabs/tab4/tab4.module').then( m => m.Tab4PageModule)
       },
-      {
-        path: 'admin-dash',
-        loadChildren: () => import('../../unitTabs/admin-dash/admin-dash.module').then( m => m.AdminDashPageModule)
-      },
+      // {
+      //   path: 'admin-dash',
+      //   loadChildren: () => import('../../unitTabs/admin-dash/admin-dash.module').then( m => m.AdminDashPageModule)
+      // },
       {
         path: 'settings',
         loadChildren: () => import('../../unitTabs/settings/settings.module').then( m => m.SettingsPageModule)

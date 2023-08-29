@@ -5,8 +5,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Tab1Page } from './tab1.page';
 import { Tab1PageRoutingModule } from './tab1-routing.module';
 import { FiltersPageModule } from '../filters/filters.module';
-import { RatingPageModule } from 'src/app/rating/rating.module';
-import { SharedSpaceTypeSliderComponent } from 'src/app/component/shared-space-type-slider/shared-space-type-slider.component';
+// import { RatingPageModule } from 'src/app/rating/rating.module';
+// import { SharedSpaceTypeSliderComponent } from 'src/app/component/shared-space-type-slider/shared-space-type-slider.component';
 import { UnitListingComponent } from 'src/app/component/unit-listing/unit-listing.component';
 
 
@@ -19,12 +19,12 @@ import { UnitListingComponent } from 'src/app/component/unit-listing/unit-listin
     ReactiveFormsModule,
     Tab1PageRoutingModule,
     FiltersPageModule,
-    RatingPageModule
+    // RatingPageModule
   ],
   entryComponents: [],
   declarations: [
     Tab1Page,
-    SharedSpaceTypeSliderComponent,
+    // SharedSpaceTypeSliderComponent,
     UnitListingComponent
   ]
 })
