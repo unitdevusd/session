@@ -16,6 +16,8 @@
   import firebase from 'firebase/app';
   import 'firebase/database'; // Import the Realtime Database module
   import { AngularFireAuth } from '@angular/fire/auth';
+  import { environment } from '../../environments/environment';
+
 
 
   const { Device } = Plugins;
@@ -69,18 +71,30 @@
       const email = this.loginForm.get('emailId').value;
       const password = this.loginForm.get('password').value;
     
-      this.fireauth.signInWithEmailAndPassword(email, password)
-        .then(res => {
-          if (res.user) {
-            console.log(res.user);
-            this.navigate();
+      const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.firebaseAPIKey}`;
+    
+      const requestBody = {
+        email: email,
+        password: password,
+        returnSecureToken: true
+      };
+    
+      this.http.post<AuthResponseData>(url, requestBody)
+        .subscribe(
+          (response) => {
+            if (response.idToken) {
+              console.log('Login successful');
+              this.settings(response, email, password);
+              this.navigate();
+            }
+          },
+          (error) => {
+            console.error('Login failed:', error);
+            this.error = error.message;
           }
-        })
-        .catch(err => {
-          console.log(`login failed ${err}`);
-          this.error = err.message;
-        });
+        );
     }
+    
     
     navigate() {
         if(this.priviousUrl == 'place-detail'){

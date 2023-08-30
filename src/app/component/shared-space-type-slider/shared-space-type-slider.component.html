@@ -1,0 +1,24 @@
+<ion-slides [options]="options">
+    <ion-slide *ngFor="let item of spaces" (click)="spaceClick(item)">
+        <ion-row>
+            <ion-row>
+                <ion-col>
+                    <div class="main">
+                        <img class="img-spacetype" *ngIf="item?.images?.length; else noImage"
+                            src="{{item.images[0]}}" />
+                        <ng-template #noImage>
+                            <img class="img-spacetype" src="../../../../assets/imgs/dummys.png"/>
+                        </ng-template>
+                    </div>
+                    <span class="space-span"
+                        [ngStyle]="{'color':item.status === true ? 'red' : '' }">{{item.spaceType}}</span>
+                </ion-col>
+            </ion-row>
+        </ion-row>
+    </ion-slide>
+</ion-slides>
+<div class="clear" *ngIf="clearFilter">
+    <p>
+        <a style="color: red;" (click)="clearFilters()">clear filters </a>
+    </p>
+</div>
