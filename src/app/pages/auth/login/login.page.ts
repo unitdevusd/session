@@ -16,11 +16,19 @@
   import firebase from 'firebase/app';
   import 'firebase/database'; // Import the Realtime Database module
   import { AngularFireAuth } from '@angular/fire/auth';
-  import { environment } from '../../environments/environment';
+  import { environment } from '../../../../environments/environment';
+  import { HttpClient } from '@angular/common/http';
+  
+
 
 
 
   const { Device } = Plugins;
+
+  interface AuthResponseData {
+    idToken: string;
+    // Add other properties if necessary
+  }
 
   @Component({
     selector: 'app-login',
@@ -44,6 +52,7 @@
       private storage: Storage,
       private router: Router,
       private _gs : GlobalService,
+      private http: HttpClient,
       private route: ActivatedRoute,
 
       ) {
@@ -71,29 +80,42 @@
       const email = this.loginForm.get('emailId').value;
       const password = this.loginForm.get('password').value;
     
-      const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.firebaseAPIKey}`;
+      this.fireauth.signInWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        if (userCredential.user) {
+          console.log('Login successful');
+          // Call your settings and navigate methods here
+        }
+      })
+      .catch(error => {
+        console.error('Login failed:', error);
+        this.error = error.message;
+      });
+  }
+
+    //   const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.firebaseConfig.apiKey}`;
+
+    //   const requestBody = {
+    //     email: email,
+    //     password: password,
+    //     returnSecureToken: true
+    //   };
     
-      const requestBody = {
-        email: email,
-        password: password,
-        returnSecureToken: true
-      };
-    
-      this.http.post<AuthResponseData>(url, requestBody)
-        .subscribe(
-          (response) => {
-            if (response.idToken) {
-              console.log('Login successful');
-              this.settings(response, email, password);
-              this.navigate();
-            }
-          },
-          (error) => {
-            console.error('Login failed:', error);
-            this.error = error.message;
-          }
-        );
-    }
+    //   this.http.post<AuthResponseData>(url, requestBody)
+    //     .subscribe(
+    //       (response) => {
+    //         if (response.idToken) {
+    //           console.log('Login successful');
+    //           this.settings(response, email, password);
+    //           this.navigate();
+    //         }
+    //       },
+    //       (error) => {
+    //         console.error('Login failed:', error);
+    //         this.error = error.message;
+    //       }
+    //     );
+    // }
     
     
     navigate() {
