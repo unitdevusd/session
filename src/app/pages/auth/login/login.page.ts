@@ -19,6 +19,7 @@
   import { environment } from '../../../../environments/environment';
   import { HttpClient } from '@angular/common/http';
   
+  
 
   const { Device } = Plugins;
 
@@ -102,19 +103,21 @@
     }    
     
     navigate() {
-        if(this.priviousUrl == 'place-detail'){
-          let navigationExtras: NavigationExtras = {
-            queryParams: {
-              from: "place-detail"
-            },
-          };
-          this.router.navigate([this.priviousUrl], navigationExtras);
-        }else{
-          this.router.navigate([this.priviousUrl]);
-        }
-        if(!this.priviousUrl){
-          this.router.navigate(["tabs/tab1"]);
-        }
+      if (this.priviousUrl === 'profile') { // Check if the previous URL was 'profile'
+        this.router.navigate(["tabs/tab1"]); // Redirect to tab1
+      } else if (this.priviousUrl === 'place-detail') { // Check if the previous URL was 'place-detail'
+        let navigationExtras: NavigationExtras = {
+          queryParams: {
+            from: "place-detail"
+          },
+        };
+        this.router.navigate([this.priviousUrl], navigationExtras);
+      } else {
+        this.router.navigate([this.priviousUrl]);
+      }
+      if (!this.priviousUrl) {
+        this.router.navigate(["tabs/tab1"]);
+      }
     }
     
     settings(data: any, email: string, password: string) {
@@ -122,13 +125,13 @@
       
     
       // Update the user data in the Firebase Realtime Database
-      const userRef = firebase.database().ref('users/' + userId);
-      userRef.set({
-        permissions: data.orgs[0].permissions,
-        session: data.idToken,
-        orgId: data.orgs[0].id,
-        // Add other fields as needed
-      });
+      // const userRef = firebase.database().ref('users/' + userId);
+      // userRef.set({
+      //   permissions: data.orgs[0].permissions,
+      //   session: data.idToken,
+      //   orgId: data.orgs[0].id,
+      //   // Add other fields as needed
+      // });
       // firebase.auth().createUserWithEmailAndPassword(email, password)
       //   .then((userCredential) => {
       //     // User created successfully
