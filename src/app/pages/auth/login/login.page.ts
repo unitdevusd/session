@@ -118,14 +118,14 @@
     }
     
     settings(data: any, email: string, password: string) {
-      const userId = data.user._id;
+      const userId = data.localId;
       
     
       // Update the user data in the Firebase Realtime Database
       const userRef = firebase.database().ref('users/' + userId);
       userRef.set({
         permissions: data.orgs[0].permissions,
-        session: data.token,
+        session: data.idToken,
         orgId: data.orgs[0].id,
         // Add other fields as needed
       });
