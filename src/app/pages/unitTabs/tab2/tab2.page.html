@@ -28,7 +28,7 @@
       </ion-segment-button>
     </ion-segment>
     <ion-slides #slides (ionSlideDidChange)="slideChanged(slides)" (ionSlidesDidLoad)="slideChanged(slides)"
-      scrollbar="false" [options]="slideOpts">
+      scrollbar="false"> <!--[options]="slideOpts"-->
       <ion-slide>
         <ion-list style="width: 100%;" class="ion-no-padding" lines="full">
           <ion-item *ngFor="let place of placeData?.bookedlist" (click)="bookingDeatils(place, 'Upcoming')">

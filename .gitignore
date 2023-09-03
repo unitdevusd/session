@@ -29,3 +29,9 @@ npm-debug.log*
 /platforms
 /plugins
 /www
+
+# Ignore node_modules
+/node_modules
+
+# Ignore environment.ts
+/src/environments/environment.ts
