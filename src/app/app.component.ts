@@ -1,9 +1,12 @@
-import { Component } from '@angular/core';
 
 import { Platform, LoadingController } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { Plugins, NetworkStatus, PluginListenerHandle } from '@capacitor/core';
+
+import { Component, OnInit } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 
 const { Network } = Plugins;
 
@@ -12,7 +15,7 @@ const { Network } = Plugins;
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
 
   networkStatus: NetworkStatus;
   networkListener: PluginListenerHandle;
@@ -21,11 +24,26 @@ export class AppComponent {
     private platform: Platform,
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
+    private afAuth: AngularFireAuth,
+    private router: Router,
     private _loader: LoadingController,
   ) {
     this.initializeApp();
   }
 
+
+  ngOnInit() {  // Added this ngOnInit method
+    this.afAuth.authState.subscribe(user => {
+      if (user) {
+        // User is logged in, you can navigate to tabs or another page
+        this.router.navigate(['/tabs']);
+      } else {
+        // User is not logged in, you can navigate to the login page
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+  
   async initializeApp() {
     await this.platform.ready();
 

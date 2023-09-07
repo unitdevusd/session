@@ -1,0 +1,177 @@
+<ion-content class="ion-no-padding" *ngIf="bookingData; else noBooking">
+  <ion-grid class="user-details ion-no-padding">
+    <ion-row class="ion-no-padding">
+      <ion-col size="12" class="ion-no-padding" *ngIf="bookingData.place.images.length">
+        <ion-slides *ngIf="bookingData.place.images.length; else noplaceImages" pager="true" [options]="slideOpts"
+          class="item-slider">
+          <ion-slide *ngFor="let img of bookingData?.place?.images">
+            <img class="slider" src="{{img}}" />
+          </ion-slide>
+        </ion-slides>
+        <div class="back" (click)="back()">
+            <img src="../../../../assets/imgs/back_two.png">
+        </div>
+      </ion-col>
+      <!-- No image check -->
+      <ng-template #noplaceImages>
+        <ion-col size="12" class="ion-no-padding">
+          <div style="text-align: center;">
+            <img src="../../../../assets/imgs/dummy_space.png" />
+          </div>
+          <div class="back" (click)="back()"><img src="../../../../assets/imgs/back_two.png"></div>
+        </ion-col>
+      </ng-template>
+    </ion-row>
+  </ion-grid>
+  <div class="content">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="8">
+          <ion-item lines="none">
+            <ion-label>
+              <h2>{{bookingData?.place?.name}}</h2>
+              <h2>{{bookingData?.place?.address}}</h2>
+              <div class="rating">
+                <ion-icon name="star" color="unit-btn"></ion-icon>
+                <ion-icon name="star" color="unit-btn"></ion-icon>
+                <ion-icon name="star" color="unit-btn"> </ion-icon>
+                <ion-icon name="star" color="unit-btn"></ion-icon>
+                <ion-icon name="star-outline"></ion-icon>
+              </div>
+            </ion-label>
+          </ion-item>
+        </ion-col>
+        <ion-col size="4">
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <hr>
+    <ion-grid class="category" *ngIf="amenities.length">
+      <ion-row>
+        <ion-col size="3" *ngFor="let item of amenities">
+          <div *ngIf="item?.images && item?.images?.length; else noImage">
+            <img src="{{item?.images[0]}}" />
+          </div>
+          <ng-template #noImage>
+            <div style="width: 50%; margin-bottom: 10px;">
+              <img src="../../../../assets/imgs/dummys.png" />
+            </div>
+          </ng-template>
+          <span>{{item.name}}</span>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="place-details">
+      <ion-row>
+        <ion-col>
+          <h3>Description</h3>
+          <p>{{bookingData?.place?.description}}</p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <hr>
+    <ion-grid class="otherInfo ion-no-padding">
+      <ion-row class="ion-no-padding">
+        <ion-col class="ion-no-padding">
+          <ion-list class="ion-no-padding" lines="none" style="margin-left: 10px;">
+            <ion-label>
+              <h2>Booked on:</h2>
+              <p>{{ bookingData?.startDate | date:'longDate'}}</p>
+            </ion-label>
+          </ion-list>
+          <ion-list class="ion-no-padding" lines="none" style="margin-left: 10px;margin-top:10px;">
+            <ion-label>
+              <h2> Booked upTo:</h2>
+              <p>{{ bookingData?.endDate | date:'longDate'}}</p>
+            </ion-label>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <hr>
+    <ion-grid class="location_info ion-no-padding">
+      <ion-row class="ion-no-padding">
+        <h3>Location</h3>
+      </ion-row>
+    </ion-grid>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="ion-no-padding">
+        <ion-col class="ion-no-padding">
+          <div class="ion-padding">
+            <div #map id="map" class="map_div"></div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <hr>
+    <!-- GUEST SIDE -->
+    <ion-grid class="owner_info ion-no-padding">
+      <ion-row class="ion-no-padding">
+        <ion-col class="ion-no-padding">
+          <ion-item lines="none">
+            <ion-avatar slot="end" style="margin-right: 20px">
+              <div *ngIf="profileImage">
+                <img src="{{profileImage}}">
+              </div>
+            </ion-avatar>
+            <ion-label>
+              <div *ngIf="type == 'Owner'">
+                <h2> Owned by {{bookingData?.ownerInfo?.profile.firstName}} {{bookingData?.ownerInfo?.profile.lastName}}
+                </h2>
+                <h3 *ngIf="bookingData.ownerInfo.profile.description">{{bookingData?.ownerInfo?.profile.description}}
+                </h3>
+                <h3 *ngIf="!bookingData.ownerInfo.profile.description">joined in may 2020</h3>
+                <h3>
+                  <ion-icon color="unit-btn" name="ribbon"></ion-icon>
+                  Verified User
+                </h3>
+              </div>
+              <div *ngIf="type == 'Tenant'">
+                <h2> Booked by {{bookingData?.tenantInfo?.profile.firstName}}
+                  {{bookingData?.tenantInfo?.profile.lastName}}</h2>
+                <h3 *ngIf="bookingData.ownerInfo.profile.description">{{bookingData?.tenantInfo?.profile.description}}
+                </h3>
+                <h3 *ngIf="!bookingData.ownerInfo.profile.description">joined in may 2020</h3>
+                <h3 class="verfied-user">
+                  <ion-icon color="unit-btn" name="ribbon"></ion-icon>
+                  Verified User
+                </h3>
+              </div>
+            </ion-label>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ion-content>
+<ng-template #noBooking>
+  <ion-content class="ion-no-padding">
+    <ion-grid class="user-details ion-no-padding">
+      <ion-row class="ion-no-padding">
+        <ion-col size="12" class="ion-no-padding">
+          <div class="back" (click)="back()"><img src="../../../../assets/imgs/back_two.png"></div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-item class="cancel-box">
+      <div class="ion-padding">
+        <img src="../../../../assets/imgs/emptyList.png">
+        <ion-label class="cancel-text"> {{text}}</ion-label>
+      </div>
+    </ion-item>
+  </ion-content>
+</ng-template>
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <div class="ion-padding">
+      {{tabType}}
+      <div *ngIf="tabType == 'Upcoming'">
+        <div *ngIf="type == 'Tenant'">
+          <ion-button color="unit-btn" class="shadow" expand="block" (click)="cancelBookingAlrt()">
+            Cancel Booking
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,19 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="color-header">
+    <!-- <ion-buttons>
+      <ion-back-button color="unit-btn" text="" icon="chevron-back-outline"></ion-back-button>
+    </ion-buttons> -->
+  </ion-toolbar>
+</ion-header>
+<div class="logo ion-text-center">
+  <img src="../../../../assets/imgs/logo-bg.png" />
+</div>
+<ion-content fullscreen>
+  <div class="content">
+    <div *ngFor="let item of roles">
+    <div class="img-card" (click)="selectRole(item._id)">
+      <img src="{{item.image}}" />
+    </div>
+  </div>
+  </div>
+</ion-content>

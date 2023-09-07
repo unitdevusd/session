@@ -1,0 +1,37 @@
+:host {
+    background-color: #ED1B25;
+  
+  }
+  .color-header{
+    --background: #ED1B25;
+  }
+  ion-content {
+    --background: transparent;
+    transform: translate3d(0, 35px, 0);
+  }
+  ion-header {
+    --ion-background-color: transparent;
+  }
+  
+  .content {
+    background-color: "secondary";
+    height: 100%;
+    border-radius: 25px;
+    padding-top: 60px;    
+  }
+  
+  .logo {
+    margin: auto;
+    width: 20%;
+  }
+  
+  .img-card{
+    max-width: 200px;
+    margin: 0 auto 30px;
+    text-align: center;
+  }
+  
+  .text-sucess{
+    border-style: solid;
+    border-color: green;
+  }
